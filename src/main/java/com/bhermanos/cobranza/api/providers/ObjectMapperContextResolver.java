@@ -32,7 +32,7 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
         ObjectMapper mapper = new ObjectMapper();
         
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
+        //mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
         //mapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         //mapper.setSerializationInclusion(Include.NON_NULL);

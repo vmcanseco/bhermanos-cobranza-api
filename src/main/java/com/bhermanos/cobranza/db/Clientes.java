@@ -5,6 +5,7 @@
  */
 package com.bhermanos.cobranza.db;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -121,6 +122,9 @@ public class Clientes implements Serializable {
     @Size(max = 100)
     @Column(length = 100)
     private String ciudad;
+    @Size(max = 100)
+    @Column(length = 100)
+    private String zona;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 15)
@@ -140,11 +144,15 @@ public class Clientes implements Serializable {
     private String movil3;
     @Size(max = 100)
     @Column(length = 100)
+    private String correoElectronico;
+    @Size(max = 100)
+    @Column(length = 100)
     private String facebook;
     @Basic(optional = false)
     @NotNull
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date fechaAlta;
     @Size(max = 500)
     @Column(length = 500)
@@ -161,9 +169,11 @@ public class Clientes implements Serializable {
     @NotNull
     @Column(updatable = false, insertable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaCreacion;
     /*@Column(nullable = true, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT ON UPDATE CURRENT_TIMESTAMP")*/
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaModificacion;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idCliente")
     private Collection<Vales> valesCollection;
@@ -294,6 +304,15 @@ public class Clientes implements Serializable {
         this.ciudad = ciudad;
     }
 
+    public String getZona() {
+        return zona;
+    }
+
+    public void setZona(String zona) {
+        this.zona = zona;
+    }
+
+    
     public String getIne() {
         return ine;
     }
@@ -329,6 +348,16 @@ public class Clientes implements Serializable {
     public String getMovil3() {
         return movil3;
     }
+
+    public String getCorreoElectronico() {
+        return correoElectronico;
+    }
+
+    public void setCorreoElectronico(String correoElectronico) {
+        this.correoElectronico = correoElectronico;
+    }
+    
+    
 
     public void setMovil3(String movil3) {
         this.movil3 = movil3;
