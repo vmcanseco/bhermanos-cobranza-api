@@ -9,6 +9,7 @@ import com.bhermanos.cobranza.db.Clientes;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -17,7 +18,10 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  *
@@ -96,6 +100,26 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
     @Produces(MediaType.TEXT_PLAIN)
     public String countREST() {
         return String.valueOf(super.count());
+    }
+    
+    @GET
+    @Path("exists")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response ineExists(@QueryParam("ine")String ine){
+        int exists=1;
+        try {
+            entityManager = getEntityManager();
+            Clientes result = entityManager.createNamedQuery("Clientes.findByIne", Clientes.class).setParameter("ine", ine).getSingleResult();
+            entityManager.close();
+            
+        } catch(NoResultException ex){
+            exists=0;
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
+        }
+        return Response.ok(exists, MediaType.TEXT_PLAIN).build();
     }
 
     /*@Override
