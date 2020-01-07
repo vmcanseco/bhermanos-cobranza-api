@@ -7,6 +7,7 @@ package com.bhermanos.cobranza.db;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -173,6 +174,7 @@ public class Clientes implements Serializable {
     @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaCreacion;
     /*@Column(nullable = true, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT ON UPDATE CURRENT_TIMESTAMP")*/
+    @Column(name = "FechaModificacion", columnDefinition = "TIMESTAMP")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaModificacion;

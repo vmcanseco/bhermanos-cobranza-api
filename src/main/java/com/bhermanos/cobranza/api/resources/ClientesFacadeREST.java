@@ -6,7 +6,10 @@
 package com.bhermanos.cobranza.api.resources;
 
 import com.bhermanos.cobranza.db.Clientes;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -42,13 +45,14 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
     public Response create(Clientes entity) {
         try {
             entityManager = getEntityManager();
-            int count = (int) entityManager.createNamedQuery("Clientes.validateExistingClient")
+            long count = (long) entityManager.createNamedQuery("Clientes.validateExistingClient")
                     .setParameter("ine", entity.getIne())
                     .setParameter("numero", entity.getNumero())
                     .getSingleResult();
             if (count > 0) {
-                return Response.status(Response.Status.NOT_FOUND).entity("INE " + entity.getIne() + " o número de cliente " + entity.getNumero() + " previamente registrada, intente con otra.").build();
+                return Response.status(Response.Status.NOT_FOUND).entity("INE " + entity.getIne() + " o número de cliente " + entity.getNumero() + " previamente registrado, intente con otra.").build();
             } else {
+                entity.setActivo("Y");
                 entityManager.getTransaction().begin();
                 entityManager.persist(entity);
                 entityManager.getTransaction().commit();
@@ -59,16 +63,40 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
             return Response.ok(entity).build();
 
         } catch (Exception ex) {
-            throw new WebApplicationException("Error al crear cliente. Consulte administrador del sitio.", ex);
+            entityManager.close();
+            ex.printStackTrace();
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al crear cliente. Consulte administrador del sitio.")
+                    .type(MediaType.TEXT_PLAIN).build());
+
         }
     }
 
     @PUT
     @Path("{id}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public void edit(@PathParam("id") Integer id, Clientes entity) {
+    public Response edit(@PathParam("id") Integer id, Clientes entity) {
 
-        super.edit(entity);
+        try {
+            entity.setId(id);
+            entity.setFechaModificacion(new Date());
+            entityManager = getEntityManager();
+           
+            entityManager.getTransaction().begin();
+            entityManager.merge(entity);
+            entityManager.getTransaction().commit();
+           // entityManager.refresh(entity);
+            entityManager.close();
+            return Response.ok(entity).build();
+
+        } catch (Exception ex) {
+            entityManager.close();
+            ex.printStackTrace();
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al actualizar cliente. Consulte administrador del sitio.")
+                    .type(MediaType.TEXT_PLAIN).build());
+
+        }
     }
 
     @DELETE
