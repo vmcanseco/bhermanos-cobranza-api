@@ -64,7 +64,8 @@ import javax.xml.bind.annotation.XmlTransient;
     , @NamedQuery(name = "Clientes.findByIdExterno", query = "SELECT c FROM Clientes c WHERE c.idExterno = :idExterno")
     , @NamedQuery(name = "Clientes.findByActivo", query = "SELECT c FROM Clientes c WHERE c.activo = :activo")
     , @NamedQuery(name = "Clientes.findByFechaCreacion", query = "SELECT c FROM Clientes c WHERE c.fechaCreacion = :fechaCreacion")
-    , @NamedQuery(name = "Clientes.findByFechaModificacion", query = "SELECT c FROM Clientes c WHERE c.fechaModificacion = :fechaModificacion")})
+    , @NamedQuery(name = "Clientes.findByFechaModificacion", query = "SELECT c FROM Clientes c WHERE c.fechaModificacion = :fechaModificacion")
+    , @NamedQuery(name = "Clientes.validateExistingClient", query = "SELECT count(c) FROM Clientes c WHERE c.ine = :ine OR c.numero=:numero")})
 public class Clientes implements Serializable {
 
     private static final long serialVersionUID = 1L;

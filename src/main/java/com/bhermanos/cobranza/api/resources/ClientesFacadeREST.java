@@ -38,18 +38,28 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
     }
 
     @POST
-    @Override
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public void create(Clientes entity) {
+    public Response create(Clientes entity) {
         try {
             entityManager = getEntityManager();
-            entityManager.getTransaction().begin();
-            entityManager.persist(entity);
-            entityManager.getTransaction().commit();
-            entityManager.refresh(entity);
+            int count = (int) entityManager.createNamedQuery("Clientes.validateExistingClient")
+                    .setParameter("ine", entity.getIne())
+                    .setParameter("numero", entity.getNumero())
+                    .getSingleResult();
+            if (count > 0) {
+                return Response.status(Response.Status.NOT_FOUND).entity("INE " + entity.getIne() + " o número de cliente " + entity.getNumero() + " previamente registrada, intente con otra.").build();
+            } else {
+                entityManager.getTransaction().begin();
+                entityManager.persist(entity);
+                entityManager.getTransaction().commit();
+                entityManager.refresh(entity);
+
+            }
             entityManager.close();
+            return Response.ok(entity).build();
+
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new WebApplicationException("Error al crear cliente. Consulte administrador del sitio.", ex);
         }
     }
 
@@ -57,6 +67,7 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
     @Path("{id}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public void edit(@PathParam("id") Integer id, Clientes entity) {
+
         super.edit(entity);
     }
 
@@ -101,25 +112,22 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
     public String countREST() {
         return String.valueOf(super.count());
     }
-    
+
     @GET
     @Path("exists")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response ineExists(@QueryParam("ine")String ine){
-        int exists=1;
+    public Response exists(@QueryParam("ine") String ine) {
         try {
             entityManager = getEntityManager();
-            Clientes result = entityManager.createNamedQuery("Clientes.findByIne", Clientes.class).setParameter("ine", ine).getSingleResult();
+            entityManager.createNamedQuery("Clientes.findByIne", Clientes.class).setParameter("ine", ine).getSingleResult();
             entityManager.close();
-            
-        } catch(NoResultException ex){
-            exists=0;
+            return Response.status(Response.Status.NOT_FOUND).entity("INE " + ine + " previamente registrada, intente con otra.").build();
+        } catch (NoResultException ex) {
+            return Response.ok("1", MediaType.TEXT_PLAIN).build();
+        } catch (Exception ex) {
+            throw new WebApplicationException("Error al consultar cliente por  INE. Consulte administrador del sitio.", ex);
         }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
-        }
-        return Response.ok(exists, MediaType.TEXT_PLAIN).build();
+
     }
 
     /*@Override
