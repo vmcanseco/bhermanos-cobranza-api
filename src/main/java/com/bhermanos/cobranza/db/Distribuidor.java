@@ -5,6 +5,7 @@
  */
 package com.bhermanos.cobranza.db;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -74,10 +75,12 @@ public class Distribuidor implements Serializable {
     private String activo;
     @Basic(optional = false)
     @NotNull
-    @Column(nullable = false)
+    @Column(updatable = false, insertable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaCreacion;
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaModificacion;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idDistribuidor")
     private Collection<Vales> valesCollection;

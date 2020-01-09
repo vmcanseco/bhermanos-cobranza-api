@@ -5,17 +5,22 @@
  */
 package com.bhermanos.cobranza.db;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -49,8 +54,8 @@ public class Vales implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @NotNull
     @Column(nullable = false)
     private Integer id;
     @Basic(optional = false)
@@ -86,16 +91,20 @@ public class Vales implements Serializable {
     private String pagado;
     @Basic(optional = false)
     @NotNull
-    @Column(nullable = false)
+    @Column(updatable = false, insertable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaCreacion;
+    @Column(name = "FechaModificacion", columnDefinition = "TIMESTAMP")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaModificacion;
     @JoinColumn(name = "IdCliente", referencedColumnName = "Id", nullable = false)
-    @ManyToOne(optional = false)
+    @OneToOne(optional = false)
+    @JsonIgnoreProperties("valesCollection")
     private Clientes idCliente;
     @JoinColumn(name = "IdDistribuidor", referencedColumnName = "Id", nullable = false)
-    @ManyToOne(optional = false)
+    @OneToOne(optional = false)
     private Distribuidor idDistribuidor;
 
     public Vales() {

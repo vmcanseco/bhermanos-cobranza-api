@@ -81,11 +81,11 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
             entity.setId(id);
             entity.setFechaModificacion(new Date());
             entityManager = getEntityManager();
-           
+
             entityManager.getTransaction().begin();
             entityManager.merge(entity);
             entityManager.getTransaction().commit();
-           // entityManager.refresh(entity);
+            // entityManager.refresh(entity);
             entityManager.close();
             return Response.ok(entity).build();
 
@@ -108,8 +108,25 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
     @GET
     @Path("{id}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Clientes find(@PathParam("id") Integer id) {
-        return super.find(id);
+    public Response find(@PathParam("id") Integer id) {
+        Clientes result;
+        try {
+            entityManager = getEntityManager();
+            result = entityManager.find(Clientes.class, id);
+            entityManager.close();
+            if (result!=null){
+                return Response.ok(result).build();
+            }else{
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al buscar cliente por Id. Consulte administrador del sitio.")
+                    .type(MediaType.TEXT_PLAIN).build());
+        }
+        
     }
 
     @GET

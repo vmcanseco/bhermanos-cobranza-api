@@ -6,14 +6,17 @@
 package com.bhermanos.cobranza.db;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -179,7 +182,8 @@ public class Clientes implements Serializable {
     @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaModificacion;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idCliente")
-    private Collection<Vales> valesCollection;
+    @JsonIgnoreProperties("idCliente")
+    private List<Vales> valesCollection;
 
     public Clientes() {
     }
@@ -422,12 +426,12 @@ public class Clientes implements Serializable {
         this.fechaModificacion = fechaModificacion;
     }
 
-    @XmlTransient
-    public Collection<Vales> getValesCollection() {
+    //@XmlTransient
+    public List<Vales> getValesCollection() {
         return valesCollection;
     }
 
-    public void setValesCollection(Collection<Vales> valesCollection) {
+    public void setValesCollection(List<Vales> valesCollection) {
         this.valesCollection = valesCollection;
     }
 
