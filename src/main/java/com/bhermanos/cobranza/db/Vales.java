@@ -76,6 +76,7 @@ public class Vales implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(nullable = false)
+    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fecha;
     @Column(precision = 7, scale = 2)
