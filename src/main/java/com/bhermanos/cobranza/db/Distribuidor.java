@@ -6,9 +6,11 @@
 package com.bhermanos.cobranza.db;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -38,6 +40,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Distribuidor.findAll", query = "SELECT d FROM Distribuidor d")
+         ,@NamedQuery(name = "Distribuidor.findAllActivos", query = "SELECT d FROM Distribuidor d where d.activo='Y'")
     , @NamedQuery(name = "Distribuidor.findById", query = "SELECT d FROM Distribuidor d WHERE d.id = :id")
     , @NamedQuery(name = "Distribuidor.findByNumero", query = "SELECT d FROM Distribuidor d WHERE d.numero = :numero")
     , @NamedQuery(name = "Distribuidor.findByNombre", query = "SELECT d FROM Distribuidor d WHERE d.nombre = :nombre")
@@ -83,7 +86,8 @@ public class Distribuidor implements Serializable {
     @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaModificacion;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idDistribuidor")
-    private Collection<Vales> valesCollection;
+    @JsonIgnore
+    private List<Vales> valesCollection;
 
     public Distribuidor() {
     }
@@ -158,11 +162,11 @@ public class Distribuidor implements Serializable {
     }
 
     @XmlTransient
-    public Collection<Vales> getValesCollection() {
+    public List<Vales> getValesCollection() {
         return valesCollection;
     }
 
-    public void setValesCollection(Collection<Vales> valesCollection) {
+    public void setValesCollection(List<Vales> valesCollection) {
         this.valesCollection = valesCollection;
     }
 
