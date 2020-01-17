@@ -38,5 +38,6 @@ public class ApplicationConfig extends Application {
         resources.add(com.bhermanos.cobranza.api.providers.ObjectMapperContextResolver.class);
         resources.add(com.bhermanos.cobranza.api.resources.ClientesFacadeREST.class);
         resources.add(com.bhermanos.cobranza.api.resources.DistribuidorFacadeREST.class);
+        resources.add(com.bhermanos.cobranza.api.resources.ValesFacadeREST.class);
     }
 }
