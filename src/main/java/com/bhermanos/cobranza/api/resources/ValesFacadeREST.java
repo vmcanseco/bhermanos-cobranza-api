@@ -7,10 +7,15 @@ package com.bhermanos.cobranza.api.resources;
 
 import com.bhermanos.cobranza.db.Vales;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -53,5 +58,19 @@ public class ValesFacadeREST extends AbstractFacade<Vales> {
                     .type(MediaType.TEXT_PLAIN).build());
 
         }
+    }
+    @GET
+    @Path("disponibles")
+    @Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+    public List<Vales> findAvailableVouchersByClient(@QueryParam("idCliente") Integer clientId){
+         List<Vales> result = new ArrayList<>();
+        try {
+            entityManager = getEntityManager();
+            result = entityManager.createNamedQuery("Vales.findAvailablesByClient", Vales.class).setParameter("idCliente", clientId).getResultList();
+            entityManager.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return result;
     }
 }

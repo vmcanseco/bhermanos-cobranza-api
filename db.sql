@@ -124,7 +124,7 @@ CREATE TABLE `vales` (
   KEY `IdClienteFk_idx` (`IdCliente`),
   CONSTRAINT `IdClienteFk` FOREIGN KEY (`IdCliente`) REFERENCES `clientes` (`Id`),
   CONSTRAINT `IdDistribuidorFk` FOREIGN KEY (`IdDistribuidor`) REFERENCES `distribuidor` (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -133,7 +133,7 @@ CREATE TABLE `vales` (
 
 LOCK TABLES `vales` WRITE;
 /*!40000 ALTER TABLE `vales` DISABLE KEYS */;
-INSERT INTO `vales` VALUES (1,1,1,'0000551-0','V',15000.00,'2020-01-01 00:00:00',15000.00,0.00,NULL,'N','2020-01-08 08:38:41',NULL);
+INSERT INTO `vales` VALUES (1,1,1,'0000551-0','V',15000.00,'2020-01-01 00:00:00',15000.00,0.00,NULL,'N','2020-01-08 08:38:41',NULL),(2,1,1,'1000-10','V',5000.00,'2020-01-13 18:00:00',500.00,0.00,NULL,'N','2020-01-14 12:09:38','2020-01-20 12:45:43'),(3,1,1,'2555-222','V',30000.00,'2020-01-19 18:00:00',30000.00,0.00,NULL,'N','2020-01-20 10:39:58',NULL);
 /*!40000 ALTER TABLE `vales` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -149,6 +149,9 @@ CREATE TABLE `ventas` (
   `IdVale` int(11) NOT NULL,
   `Monto` decimal(7,2) NOT NULL DEFAULT '0.00',
   `Plazo` int(11) NOT NULL,
+  `DiaPago` int(2) NOT NULL DEFAULT '1',
+  `MesInicioPago` int(2) NOT NULL DEFAULT '1',
+  `PagoMinimo` decimal(7,2) NOT NULL DEFAULT '0.00',
   `Fecha` datetime NOT NULL,
   `MontoPagado` decimal(7,2) NOT NULL DEFAULT '0.00',
   `MontoDisponible` decimal(7,2) NOT NULL DEFAULT '0.00',
@@ -160,7 +163,7 @@ CREATE TABLE `ventas` (
   PRIMARY KEY (`Id`),
   KEY `IdValeFk_idx` (`IdVale`),
   CONSTRAINT `IdValeFk` FOREIGN KEY (`IdVale`) REFERENCES `vales` (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -169,6 +172,7 @@ CREATE TABLE `ventas` (
 
 LOCK TABLES `ventas` WRITE;
 /*!40000 ALTER TABLE `ventas` DISABLE KEYS */;
+INSERT INTO `ventas` VALUES (1,2,4500.00,15,1,2,300.00,'2020-01-20 00:00:00',0.00,4500.00,'N',0.00,NULL,'2020-01-20 11:24:50',NULL);
 /*!40000 ALTER TABLE `ventas` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -181,4 +185,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-10 16:44:23
+-- Dump completed on 2020-01-20 17:18:34

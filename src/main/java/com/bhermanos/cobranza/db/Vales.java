@@ -13,6 +13,7 @@ import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -49,7 +50,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "Vales.findByUltimoPago", query = "SELECT v FROM Vales v WHERE v.ultimoPago = :ultimoPago")
     , @NamedQuery(name = "Vales.findByPagado", query = "SELECT v FROM Vales v WHERE v.pagado = :pagado")
     , @NamedQuery(name = "Vales.findByFechaCreacion", query = "SELECT v FROM Vales v WHERE v.fechaCreacion = :fechaCreacion")
-    , @NamedQuery(name = "Vales.findByFechaModificacion", query = "SELECT v FROM Vales v WHERE v.fechaModificacion = :fechaModificacion")})
+    , @NamedQuery(name = "Vales.findByFechaModificacion", query = "SELECT v FROM Vales v WHERE v.fechaModificacion = :fechaModificacion")
+    , @NamedQuery(name = "Vales.findAvailablesByClient", query = "SELECT v FROM Vales v WHERE v.idCliente.id = :idCliente and v.pagado='N' and v.montoDisponible>0")})
 public class Vales implements Serializable {
 
     private static final long serialVersionUID = 1L;
