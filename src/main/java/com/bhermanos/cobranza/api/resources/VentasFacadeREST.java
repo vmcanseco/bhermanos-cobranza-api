@@ -58,6 +58,7 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
             entity.setPagada("N");
             entity.setIntereses(BigDecimal.ZERO);
             entity.setPagoMinimo(minPay);
+            entity.setPagoFinal(entity.getMonto().subtract(minPay.multiply(BigDecimal.valueOf(entity.getPlazo()-1))));
             entityManager.getTransaction().begin();
             entityManager.persist(entity);
             entityManager.getTransaction().commit();
@@ -69,7 +70,7 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
             entityManager.close();
             ex.printStackTrace();
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error al crear cliente. Consulte administrador del sitio.")
+                    .entity("Error al registrar venta. Consulte administrador del sitio.")
                     .type(MediaType.TEXT_PLAIN).build());
 
         }

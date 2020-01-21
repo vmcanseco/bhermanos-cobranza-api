@@ -152,11 +152,13 @@ CREATE TABLE `ventas` (
   `DiaPago` int(2) NOT NULL DEFAULT '1',
   `MesInicioPago` int(2) NOT NULL DEFAULT '1',
   `PagoMinimo` decimal(7,2) NOT NULL DEFAULT '0.00',
+  `PagoFinal` decimal(7,2) DEFAULT NULL,
   `Fecha` datetime NOT NULL,
   `MontoPagado` decimal(7,2) NOT NULL DEFAULT '0.00',
   `MontoDisponible` decimal(7,2) NOT NULL DEFAULT '0.00',
   `Pagada` varchar(1) COLLATE latin1_spanish_ci DEFAULT NULL,
   `Intereses` decimal(7,2) DEFAULT '0.00',
+  `PrimerPago` datetime DEFAULT NULL,
   `UltimoPago` datetime DEFAULT NULL,
   `FechaCreacion` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `FechaModificacion` datetime DEFAULT NULL,
@@ -172,7 +174,7 @@ CREATE TABLE `ventas` (
 
 LOCK TABLES `ventas` WRITE;
 /*!40000 ALTER TABLE `ventas` DISABLE KEYS */;
-INSERT INTO `ventas` VALUES (1,2,4500.00,15,1,2,300.00,'2020-01-20 00:00:00',0.00,4500.00,'N',0.00,NULL,'2020-01-20 11:24:50',NULL);
+INSERT INTO `ventas` VALUES (1,2,4500.00,15,1,2,300.00,NULL,'2020-01-20 00:00:00',0.00,4500.00,'N',0.00,NULL,NULL,'2020-01-20 11:24:50',NULL);
 /*!40000 ALTER TABLE `ventas` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -185,4 +187,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-20 17:18:34
+-- Dump completed on 2020-01-21 17:56:13

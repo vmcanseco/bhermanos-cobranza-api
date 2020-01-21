@@ -81,6 +81,11 @@ public class Ventas implements Serializable {
      @Column(name = "PagoMinimo", nullable = false, precision = 7, scale = 2)
     private BigDecimal pagoMinimo;    
     
+    @Basic(optional = true)
+    @NotNull
+     @Column(name = "PagoFinal", nullable = true, precision = 7, scale = 2)
+    private BigDecimal pagoFinal;
+    
     @Basic(optional = false)
     @NotNull
     @Column(nullable = false)
@@ -100,8 +105,13 @@ public class Ventas implements Serializable {
     private String pagada;
     @Column(name = "Intereses", precision = 7, scale = 2)
     private BigDecimal intereses;
+    @Column(name = "PrimerPago")
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    private Date primerPago;
     @Column(name = "UltimoPago")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date ultimoPago;
     @Basic(optional = false)
     @NotNull
@@ -279,6 +289,23 @@ public class Ventas implements Serializable {
     public void setPagoMinimo(BigDecimal pagoMinimo) {
         this.pagoMinimo = pagoMinimo;
     }
+
+    public BigDecimal getPagoFinal() {
+        return pagoFinal;
+    }
+
+    public void setPagoFinal(BigDecimal pagoFinal) {
+        this.pagoFinal = pagoFinal;
+    }
+
+    public Date getPrimerPago() {
+        return primerPago;
+    }
+
+    public void setPrimerPago(Date primerPago) {
+        this.primerPago = primerPago;
+    }
+    
     
     
 
