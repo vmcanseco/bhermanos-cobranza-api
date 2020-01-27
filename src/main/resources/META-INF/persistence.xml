@@ -10,6 +10,7 @@
     <class>com.bhermanos.cobranza.db.temp.Clientes</class>
     <class>com.bhermanos.cobranza.db.temp.Vales</class>
     <class>com.bhermanos.cobranza.db.Ventas</class>
+    <class>com.bhermanos.cobranza.db.Pagos</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/bhermanos?zeroDateTimeBehavior=convertToNull"/>
       <property name="javax.persistence.jdbc.user" value="bhermanos"/>

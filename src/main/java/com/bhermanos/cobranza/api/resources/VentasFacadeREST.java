@@ -5,6 +5,7 @@
  */
 package com.bhermanos.cobranza.api.resources;
 
+import com.bhermanos.cobranza.db.Pagos;
 import com.bhermanos.cobranza.db.Vales;
 import com.bhermanos.cobranza.db.Ventas;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +13,10 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
@@ -51,22 +55,81 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
                         .entity(String.format("La venta por %f, supera el monto disponible en el vale de %f", entity.getMonto(), vale.getMontoDisponible()))
                         .type(MediaType.TEXT_PLAIN).build());
             }
+            entityManager.getTransaction().begin();
 
-            BigDecimal minPay=entity.getMonto().divide(BigDecimal.valueOf(entity.getPlazo()), RoundingMode.DOWN);
+            BigDecimal minPay = entity.getMonto().divide(BigDecimal.valueOf(entity.getPlazo()), RoundingMode.DOWN);
             entity.setMontoDisponible(entity.getMonto());
             entity.setMontoPagado(BigDecimal.ZERO);
             entity.setPagada("N");
             entity.setIntereses(BigDecimal.ZERO);
             entity.setPagoMinimo(minPay);
-            entity.setPagoFinal(entity.getMonto().subtract(minPay.multiply(BigDecimal.valueOf(entity.getPlazo()-1))));
-            entityManager.getTransaction().begin();
+            entity.setMesInicioPago(entity.getMesInicioPago()+1);
+            entity.setPagoFinal(entity.getMonto().subtract(minPay.multiply(BigDecimal.valueOf(entity.getPlazo() - 1))));
+
             entityManager.persist(entity);
+
+            //entityManager.getTransaction().commit();
+            /*Actualizar monto disponible del vale*/
+            vale.setMontoDisponible(vale.getMontoDisponible().subtract(entity.getMonto()));
+            entityManager.merge(vale);
+
+
+            /*Generar pagos */
+            int currentMonth = LocalDate.now().getMonthValue();
+            int currentYear = LocalDate.now().getYear();
+
+            if (currentMonth > entity.getMesInicioPago()) {
+                currentYear++;
+            }
+
+            LocalDate currentDate = LocalDate.of(currentYear, entity.getMesInicioPago(), 1);
+            if (entity.getDiaPago() == 1) {
+                currentDate = currentDate.plusDays(15);
+            } else {
+                currentDate = currentDate.plusMonths(1).minusDays(1);
+            }
+
+            for (int numPago = 1; numPago <=entity.getPlazo(); numPago++) {
+                //entityManager.getTransaction().begin();
+
+                Pagos pago = new Pagos();
+                pago.setIdVenta(entity);
+                pago.setTipoPago(entity.getDiaPago());
+                pago.setFechaProgramada(java.sql.Date.valueOf(currentDate));
+                pago.setPagado("N");
+                pago.setFechaCreacion(new Date());
+                pago.setNumPago(numPago);
+                if (numPago < entity.getPlazo()) {
+                    pago.setMonto(entity.getPagoMinimo());
+                } else {
+                    pago.setMonto(entity.getPagoFinal());
+                }
+
+                if (entity.getDiaPago() == 1) {
+                    currentDate = currentDate.plusMonths(1);
+                } else {
+                    currentDate=currentDate.plusMonths(1);
+                            
+                    currentDate =LocalDate.of(currentDate.getYear(), currentDate.getMonth(),currentDate.lengthOfMonth());
+                }
+
+                entityManager.persist(pago);
+
+            }
             entityManager.getTransaction().commit();
             entityManager.refresh(entity);
             entityManager.close();
-            return Response.ok(entity).build();
+            SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+            filterProvider.addFilter("voucherFilter",
+                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente","idVenta", "idVale","pagosList"));
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setFilterProvider(filterProvider);
+            String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entity);
+            return Response.ok(jsonResult).build();
+            //return Response.ok(entity).build();
 
         } catch (Exception ex) {
+            entityManager.getTransaction().rollback();
             entityManager.close();
             ex.printStackTrace();
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -86,7 +149,7 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
             entityManager.close();
             SimpleFilterProvider filterProvider = new SimpleFilterProvider();
             filterProvider.addFilter("voucherFilter",
-                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente"));
+                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente","idVenta", "idVale","pagosList"));
             ObjectMapper mapper = new ObjectMapper();
             mapper.setFilterProvider(filterProvider);
             String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);

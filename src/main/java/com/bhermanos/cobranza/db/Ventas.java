@@ -5,12 +5,14 @@
  */
 package com.bhermanos.cobranza.db;
 
-import com.bhermanos.cobranza.db.Vales;
+
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +23,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -127,6 +130,9 @@ public class Ventas implements Serializable {
     @ManyToOne(optional = false)
     @JsonFilter("voucherFilter")
     private Vales idVale;
+    @OneToMany(mappedBy = "idVenta")
+    @JsonFilter("voucherFilter")
+    private List<Pagos> pagosList;
 
     public Ventas() {
     }
@@ -304,6 +310,14 @@ public class Ventas implements Serializable {
 
     public void setPrimerPago(Date primerPago) {
         this.primerPago = primerPago;
+    }
+
+    public List<Pagos> getPagosList() {
+        return pagosList;
+    }
+
+    public void setPagosList(List<Pagos> pagosList) {
+        this.pagosList = pagosList;
     }
     
     

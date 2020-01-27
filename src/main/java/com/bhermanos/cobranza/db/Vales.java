@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +22,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -35,7 +37,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author canseco.victor
  */
 @Entity
-@Table(uniqueConstraints = {
+@Table(name = "vales", catalog = "bhermanos", schema = "", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"Folio"})})
 @XmlRootElement
 @NamedQueries({
@@ -78,7 +80,7 @@ public class Vales implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(nullable = false)
-    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fecha;
     @Column(precision = 7, scale = 2)
@@ -96,11 +98,11 @@ public class Vales implements Serializable {
     @NotNull
     @Column(updatable = false, insertable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaCreacion;
     @Column(name = "FechaModificacion", columnDefinition = "TIMESTAMP")
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaModificacion;
     @JoinColumn(name = "IdCliente", referencedColumnName = "Id", nullable = false)
     @OneToOne(optional = false)
@@ -109,6 +111,8 @@ public class Vales implements Serializable {
     @JoinColumn(name = "IdDistribuidor", referencedColumnName = "Id", nullable = false)
     @OneToOne(optional = false)
     private Distribuidor idDistribuidor;
+    @OneToMany(mappedBy = "idVale")
+    private List<Pagos> pagosList;
 
     public Vales() {
     }
@@ -255,5 +259,14 @@ public class Vales implements Serializable {
     public String toString() {
         return "com.bhermanos.cobranza.api.Vales[ id=" + id + " ]";
     }
+
+    public List<Pagos> getPagosList() {
+        return pagosList;
+    }
+
+    public void setPagosList(List<Pagos> pagosList) {
+        this.pagosList = pagosList;
+    }
+
     
 }
