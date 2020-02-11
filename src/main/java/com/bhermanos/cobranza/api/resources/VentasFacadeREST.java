@@ -88,6 +88,7 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
             } else {
                 currentDate = currentDate.plusMonths(1).minusDays(1);
             }
+            entity.setPrimerPago(java.sql.Date.valueOf(currentDate));
 
             for (int numPago = 1; numPago <=entity.getPlazo(); numPago++) {
                 //entityManager.getTransaction().begin();
@@ -105,13 +106,18 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
                     pago.setMonto(entity.getPagoFinal());
                 }
 
-                if (entity.getDiaPago() == 1) {
+                if (currentDate.getDayOfMonth()==15){
+                    currentDate =LocalDate.of(currentDate.getYear(), currentDate.getMonth(),currentDate.lengthOfMonth());
+                }else{
+                     currentDate=currentDate.plusMonths(1).plusDays(15);
+                }
+                /*if (entity.getDiaPago() == 1) {
                     currentDate = currentDate.plusMonths(1);
                 } else {
                     currentDate=currentDate.plusMonths(1);
                             
                     currentDate =LocalDate.of(currentDate.getYear(), currentDate.getMonth(),currentDate.lengthOfMonth());
-                }
+                }*/
 
                 entityManager.persist(pago);
 

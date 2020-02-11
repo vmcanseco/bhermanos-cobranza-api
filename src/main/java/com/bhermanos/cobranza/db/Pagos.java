@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +22,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -33,7 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author canseco.victor
  */
 @Entity
-@Table(name = "pagos", catalog = "bhermanos", schema = "")
+@Table(name = "pagos",catalog = "bhermanos", schema = "")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Pagos.findAll", query = "SELECT p FROM Pagos p")
@@ -49,51 +51,56 @@ public class Pagos implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
+    @NotNull
     @Column(nullable = false)
     private Integer id;
     @Basic(optional = false)
-    @Column(name="NumPago" , nullable = false)
+    @NotNull
+    @Column(nullable = false)
     private int numPago;
-    @Size(max = 50)
-    @Column(name = "FormaPago", length = 50)
-    private String formaPago;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Basic(optional = false)
     @NotNull
-    @Column(name = "Monto", nullable = false, precision = 7, scale = 2)
+    @Column(nullable = false, precision = 7, scale = 2)
     private BigDecimal monto;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "TipoPago", nullable = false)
+    @Column(nullable = false)
     private int tipoPago;
+    @Basic(optional = false)
+    @NotNull
+    @Column(nullable = false, precision = 7, scale = 2)
+    private BigDecimal intereses;
     @Size(max = 1)
-    @Column(name = "Pagado", length = 1)
+    @Column(length = 1)
     private String pagado;
+    @Basic(optional = false)
+    @NotNull
+    @Column(nullable = false, precision = 7, scale = 2)
+    private BigDecimal montoPagado;
+    @Basic(optional = false)
+    @NotNull
+    @Column(nullable = false, precision = 7, scale = 2)
+    private BigDecimal interesesPagados;
     @Basic(optional = false)
     @NotNull
     @Column(name = "FechaProgramada", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date fechaProgramada;
-    @Column(name = "FechaPago")
-    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaPago;
     @Basic(optional = false)
     @NotNull
     @Column(name = "FechaCreacion", nullable = false)
-    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaCreacion;
     @Column(name = "FechaActualizacion")
-    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaActualizacion;
-    @JoinColumn(name = "IdVale", referencedColumnName = "Id")
-    @ManyToOne
-    private Vales idVale;
+    @OneToMany(mappedBy = "idPago")
+    private List<HistorialPagos> historialPagosList;
     @JoinColumn(name = "IdVenta", referencedColumnName = "Id")
     @ManyToOne
     private Ventas idVenta;
@@ -153,14 +160,6 @@ public class Pagos implements Serializable {
         this.fechaProgramada = fechaProgramada;
     }
 
-    public Date getFechaPago() {
-        return fechaPago;
-    }
-
-    public void setFechaPago(Date fechaPago) {
-        this.fechaPago = fechaPago;
-    }
-
     public Date getFechaCreacion() {
         return fechaCreacion;
     }
@@ -175,14 +174,6 @@ public class Pagos implements Serializable {
 
     public void setFechaActualizacion(Date fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
-    }
-
-    public Vales getIdVale() {
-        return idVale;
-    }
-
-    public void setIdVale(Vales idVale) {
-        this.idVale = idVale;
     }
 
     public Ventas getIdVenta() {
@@ -201,15 +192,37 @@ public class Pagos implements Serializable {
         this.numPago = numPago;
     }
 
-    public String getFormaPago() {
-        return formaPago;
+    public BigDecimal getIntereses() {
+        return intereses;
     }
 
-    public void setFormaPago(String formaPago) {
-        this.formaPago = formaPago;
+    public void setIntereses(BigDecimal intereses) {
+        this.intereses = intereses;
+    }
+
+    public BigDecimal getMontoPagado() {
+        return montoPagado;
+    }
+
+    public void setMontoPagado(BigDecimal montoPagado) {
+        this.montoPagado = montoPagado;
+    }
+
+    public BigDecimal getInteresesPagados() {
+        return interesesPagados;
+    }
+
+    public void setInteresesPagados(BigDecimal interesesPagados) {
+        this.interesesPagados = interesesPagados;
     }
     
-    
+        public List<HistorialPagos> getHistorialPagosList() {
+        return historialPagosList;
+    }
+
+    public void setHistorialPagosList(List<HistorialPagos> historialPagosList) {
+        this.historialPagosList = historialPagosList;
+    }
 
     @Override
     public int hashCode() {
@@ -235,5 +248,5 @@ public class Pagos implements Serializable {
     public String toString() {
         return "com.bhermanos.cobranza.db.temp.Pagos[ id=" + id + " ]";
     }
-    
+
 }

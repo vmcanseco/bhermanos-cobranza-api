@@ -36,22 +36,29 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author canseco.victor
  */
 @Entity
-@Table(name = "ventas", catalog = "bhermanos", schema = "")
+@Table(name = "ventas",catalog = "bhermanos", schema = "")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Ventas.findAll", query = "SELECT v FROM Ventas v")
     , @NamedQuery(name = "Ventas.findById", query = "SELECT v FROM Ventas v WHERE v.id = :id")
     , @NamedQuery(name = "Ventas.findByMonto", query = "SELECT v FROM Ventas v WHERE v.monto = :monto")
     , @NamedQuery(name = "Ventas.findByPlazo", query = "SELECT v FROM Ventas v WHERE v.plazo = :plazo")
+    , @NamedQuery(name = "Ventas.findByDiaPago", query = "SELECT v FROM Ventas v WHERE v.diaPago = :diaPago")
+    , @NamedQuery(name = "Ventas.findByMesInicioPago", query = "SELECT v FROM Ventas v WHERE v.mesInicioPago = :mesInicioPago")
+    , @NamedQuery(name = "Ventas.findByAnioInicioPago", query = "SELECT v FROM Ventas v WHERE v.anioInicioPago = :anioInicioPago")
+    , @NamedQuery(name = "Ventas.findByPagoMinimo", query = "SELECT v FROM Ventas v WHERE v.pagoMinimo = :pagoMinimo")
+    , @NamedQuery(name = "Ventas.findByPagoFinal", query = "SELECT v FROM Ventas v WHERE v.pagoFinal = :pagoFinal")
     , @NamedQuery(name = "Ventas.findByFecha", query = "SELECT v FROM Ventas v WHERE v.fecha = :fecha")
     , @NamedQuery(name = "Ventas.findByMontoPagado", query = "SELECT v FROM Ventas v WHERE v.montoPagado = :montoPagado")
     , @NamedQuery(name = "Ventas.findByMontoDisponible", query = "SELECT v FROM Ventas v WHERE v.montoDisponible = :montoDisponible")
     , @NamedQuery(name = "Ventas.findByPagada", query = "SELECT v FROM Ventas v WHERE v.pagada = :pagada")
     , @NamedQuery(name = "Ventas.findByIntereses", query = "SELECT v FROM Ventas v WHERE v.intereses = :intereses")
+    , @NamedQuery(name = "Ventas.findByTasaInteres", query = "SELECT v FROM Ventas v WHERE v.tasaInteres = :tasaInteres")
+    , @NamedQuery(name = "Ventas.findByDiasInteres", query = "SELECT v FROM Ventas v WHERE v.diasInteres = :diasInteres")
+    , @NamedQuery(name = "Ventas.findByPrimerPago", query = "SELECT v FROM Ventas v WHERE v.primerPago = :primerPago")
     , @NamedQuery(name = "Ventas.findByUltimoPago", query = "SELECT v FROM Ventas v WHERE v.ultimoPago = :ultimoPago")
     , @NamedQuery(name = "Ventas.findByFechaCreacion", query = "SELECT v FROM Ventas v WHERE v.fechaCreacion = :fechaCreacion")
-    , @NamedQuery(name = "Ventas.findByFechaModificacion", query = "SELECT v FROM Ventas v WHERE v.fechaModificacion = :fechaModificacion")
-    , @NamedQuery(name = "Ventas.findByClientId", query = "SELECT v FROM Ventas v WHERE v.idVale.idCliente.id = :idCliente")})
+    , @NamedQuery(name = "Ventas.findByFechaModificacion", query = "SELECT v FROM Ventas v WHERE v.fechaModificacion = :fechaModificacion")})
 
 public class Ventas implements Serializable {
 
@@ -81,6 +88,10 @@ public class Ventas implements Serializable {
     private int mesInicioPago;    
     @Basic(optional = false)
     @NotNull
+    @Column(nullable = false)
+    private int anioInicioPago;
+    @Basic(optional = false)
+    @NotNull
      @Column(name = "PagoMinimo", nullable = false, precision = 7, scale = 2)
     private BigDecimal pagoMinimo;    
     
@@ -108,6 +119,14 @@ public class Ventas implements Serializable {
     private String pagada;
     @Column(name = "Intereses", precision = 7, scale = 2)
     private BigDecimal intereses;
+    @Basic(optional = false)
+    @NotNull
+    @Column(nullable = false)
+    private int tasaInteres;
+    @Basic(optional = false)
+    @NotNull
+    @Column(nullable = false)
+    private int diasInteres;
     @Column(name = "PrimerPago")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
@@ -246,6 +265,8 @@ public class Ventas implements Serializable {
     public void setIdVale(Vales idVale) {
         this.idVale = idVale;
     }
+    
+    
 
     @Override
     public int hashCode() {
@@ -319,6 +340,32 @@ public class Ventas implements Serializable {
     public void setPagosList(List<Pagos> pagosList) {
         this.pagosList = pagosList;
     }
+
+    public int getAnioInicioPago() {
+        return anioInicioPago;
+    }
+
+    public void setAnioInicioPago(int anioInicioPago) {
+        this.anioInicioPago = anioInicioPago;
+    }
+
+    public int getTasaInteres() {
+        return tasaInteres;
+    }
+
+    public void setTasaInteres(int tasaInteres) {
+        this.tasaInteres = tasaInteres;
+    }
+
+    public int getDiasInteres() {
+        return diasInteres;
+    }
+
+    public void setDiasInteres(int diasInteres) {
+        this.diasInteres = diasInteres;
+    }
+    
+    
     
     
     

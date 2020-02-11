@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author canseco.victor
  */
 @Entity
-@Table(name = "clientes", catalog = "bhermanos", schema = "", uniqueConstraints = {
+@Table(name = "clientes",catalog = "", schema = "", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"Numero"})
     , @UniqueConstraint(columnNames = {"Id"})
     , @UniqueConstraint(columnNames = {"ine"})})
@@ -153,7 +153,7 @@ public class Clientes implements Serializable {
     @NotNull
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date fechaAlta;
     @Size(max = 500)
     @Column(length = 500)
@@ -170,16 +170,18 @@ public class Clientes implements Serializable {
     @NotNull
     @Column(updatable = false, insertable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaCreacion;
     /*@Column(nullable = true, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT ON UPDATE CURRENT_TIMESTAMP")*/
     @Column(name = "FechaModificacion", columnDefinition = "TIMESTAMP")
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private Date fechaModificacion;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idCliente")
     @JsonIgnoreProperties("idCliente")
     private List<Vales> valesCollection;
+    @OneToMany(mappedBy = "idCliente")
+    private List<HistorialPagos> historialPagosList;
 
     public Clientes() {
     }
@@ -315,7 +317,6 @@ public class Clientes implements Serializable {
         this.zona = zona;
     }
 
-    
     public String getIne() {
         return ine;
     }
@@ -359,8 +360,6 @@ public class Clientes implements Serializable {
     public void setCorreoElectronico(String correoElectronico) {
         this.correoElectronico = correoElectronico;
     }
-    
-    
 
     public void setMovil3(String movil3) {
         this.movil3 = movil3;
@@ -429,6 +428,14 @@ public class Clientes implements Serializable {
 
     public void setValesCollection(List<Vales> valesCollection) {
         this.valesCollection = valesCollection;
+    }
+
+    public List<HistorialPagos> getHistorialPagosList() {
+        return historialPagosList;
+    }
+
+    public void setHistorialPagosList(List<HistorialPagos> historialPagosList) {
+        this.historialPagosList = historialPagosList;
     }
 
     @Override
