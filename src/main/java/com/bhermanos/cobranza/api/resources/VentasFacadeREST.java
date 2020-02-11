@@ -65,8 +65,7 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
             entity.setPagoMinimo(minPay);
             entity.setMesInicioPago(entity.getMesInicioPago()+1);
             entity.setPagoFinal(entity.getMonto().subtract(minPay.multiply(BigDecimal.valueOf(entity.getPlazo() - 1))));
-
-            entityManager.persist(entity);
+            
 
             //entityManager.getTransaction().commit();
             /*Actualizar monto disponible del vale*/
@@ -75,12 +74,12 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
 
 
             /*Generar pagos */
-            int currentMonth = LocalDate.now().getMonthValue();
-            int currentYear = LocalDate.now().getYear();
+            //int currentMonth = LocalDate.now().getMonthValue();
+            int currentYear = entity.getAnioInicioPago();//LocalDate.now().getYear();
 
-            if (currentMonth > entity.getMesInicioPago()) {
+            /*if (currentMonth > entity.getMesInicioPago()) {
                 currentYear++;
-            }
+            }*/
 
             LocalDate currentDate = LocalDate.of(currentYear, entity.getMesInicioPago(), 1);
             if (entity.getDiaPago() == 1) {
@@ -100,6 +99,11 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
                 pago.setPagado("N");
                 pago.setFechaCreacion(new Date());
                 pago.setNumPago(numPago);
+                pago.setIntereses(BigDecimal.ZERO);
+                pago.setInteresesPagados(BigDecimal.ZERO);
+                pago.setMontoPagado(BigDecimal.ZERO);
+                pago.setFechaCreacion(new Date());
+                entity.setUltimoPago(java.sql.Date.valueOf(currentDate));
                 if (numPago < entity.getPlazo()) {
                     pago.setMonto(entity.getPagoMinimo());
                 } else {
@@ -109,7 +113,7 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
                 if (currentDate.getDayOfMonth()==15){
                     currentDate =LocalDate.of(currentDate.getYear(), currentDate.getMonth(),currentDate.lengthOfMonth());
                 }else{
-                     currentDate=currentDate.plusMonths(1).plusDays(15);
+                     currentDate=currentDate.plusDays(15);
                 }
                 /*if (entity.getDiaPago() == 1) {
                     currentDate = currentDate.plusMonths(1);
@@ -122,6 +126,7 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
                 entityManager.persist(pago);
 
             }
+            entityManager.persist(entity);
             entityManager.getTransaction().commit();
             entityManager.refresh(entity);
             entityManager.close();

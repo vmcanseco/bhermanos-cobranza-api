@@ -44,15 +44,14 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "Pagos.findByTipoPago", query = "SELECT p FROM Pagos p WHERE p.tipoPago = :tipoPago")
     , @NamedQuery(name = "Pagos.findByPagado", query = "SELECT p FROM Pagos p WHERE p.pagado = :pagado")
     , @NamedQuery(name = "Pagos.findByFechaProgramada", query = "SELECT p FROM Pagos p WHERE p.fechaProgramada = :fechaProgramada")
-    , @NamedQuery(name = "Pagos.findByFechaPago", query = "SELECT p FROM Pagos p WHERE p.fechaPago = :fechaPago")
     , @NamedQuery(name = "Pagos.findByFechaCreacion", query = "SELECT p FROM Pagos p WHERE p.fechaCreacion = :fechaCreacion")
     , @NamedQuery(name = "Pagos.findByFechaActualizacion", query = "SELECT p FROM Pagos p WHERE p.fechaActualizacion = :fechaActualizacion")})
 public class Pagos implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @NotNull
     @Column(nullable = false)
     private Integer id;
     @Basic(optional = false)

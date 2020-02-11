@@ -5,7 +5,6 @@
  */
 package com.bhermanos.cobranza.db;
 
-
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -36,7 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author canseco.victor
  */
 @Entity
-@Table(name = "ventas",catalog = "bhermanos", schema = "")
+@Table(name = "ventas", catalog = "bhermanos", schema = "")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Ventas.findAll", query = "SELECT v FROM Ventas v")
@@ -58,7 +57,9 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "Ventas.findByPrimerPago", query = "SELECT v FROM Ventas v WHERE v.primerPago = :primerPago")
     , @NamedQuery(name = "Ventas.findByUltimoPago", query = "SELECT v FROM Ventas v WHERE v.ultimoPago = :ultimoPago")
     , @NamedQuery(name = "Ventas.findByFechaCreacion", query = "SELECT v FROM Ventas v WHERE v.fechaCreacion = :fechaCreacion")
-    , @NamedQuery(name = "Ventas.findByFechaModificacion", query = "SELECT v FROM Ventas v WHERE v.fechaModificacion = :fechaModificacion")})
+    , @NamedQuery(name = "Ventas.findByFechaModificacion", query = "SELECT v FROM Ventas v WHERE v.fechaModificacion = :fechaModificacion")
+    , @NamedQuery(name = "Ventas.findByClientId", query = "SELECT v FROM Ventas v WHERE v.idVale.idCliente.id = :idCliente")
+    , @NamedQuery(name = "Ventas.findUnpaidSales", query = "SELECT v FROM Ventas v WHERE v.pagada='N'")})
 
 public class Ventas implements Serializable {
 
@@ -77,29 +78,29 @@ public class Ventas implements Serializable {
     @NotNull
     @Column(name = "Plazo", nullable = false)
     private int plazo;
-    
+
     @Basic(optional = false)
     @NotNull
     @Column(name = "DiaPago", nullable = false)
-    private int diaPago;    
+    private int diaPago;
     @Basic(optional = false)
     @NotNull
     @Column(name = "mesInicioPago", nullable = false)
-    private int mesInicioPago;    
+    private int mesInicioPago;
     @Basic(optional = false)
     @NotNull
     @Column(nullable = false)
     private int anioInicioPago;
     @Basic(optional = false)
     @NotNull
-     @Column(name = "PagoMinimo", nullable = false, precision = 7, scale = 2)
-    private BigDecimal pagoMinimo;    
-    
+    @Column(name = "PagoMinimo", nullable = false, precision = 7, scale = 2)
+    private BigDecimal pagoMinimo;
+
     @Basic(optional = true)
     @NotNull
-     @Column(name = "PagoFinal", nullable = true, precision = 7, scale = 2)
+    @Column(name = "PagoFinal", nullable = true, precision = 7, scale = 2)
     private BigDecimal pagoFinal;
-    
+
     @Basic(optional = false)
     @NotNull
     @Column(nullable = false)
@@ -265,8 +266,6 @@ public class Ventas implements Serializable {
     public void setIdVale(Vales idVale) {
         this.idVale = idVale;
     }
-    
-    
 
     @Override
     public int hashCode() {
@@ -364,10 +363,5 @@ public class Ventas implements Serializable {
     public void setDiasInteres(int diasInteres) {
         this.diasInteres = diasInteres;
     }
-    
-    
-    
-    
-    
 
 }

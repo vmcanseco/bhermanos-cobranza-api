@@ -53,7 +53,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "Vales.findByPagado", query = "SELECT v FROM Vales v WHERE v.pagado = :pagado")
     , @NamedQuery(name = "Vales.findByFechaCreacion", query = "SELECT v FROM Vales v WHERE v.fechaCreacion = :fechaCreacion")
     , @NamedQuery(name = "Vales.findByFechaModificacion", query = "SELECT v FROM Vales v WHERE v.fechaModificacion = :fechaModificacion")
-    , @NamedQuery(name = "Vales.findAvailablesByClient", query = "SELECT v FROM Vales v WHERE v.idCliente.id = :idCliente and v.pagado='N' and v.montoDisponible>0")})
+    , @NamedQuery(name = "Vales.findAvailablesByClient", query = "SELECT v FROM Vales v WHERE v.idCliente.id = :idCliente and v.pagado='N' and v.montoDisponible>0.0")})
 public class Vales implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -111,8 +111,6 @@ public class Vales implements Serializable {
     @JoinColumn(name = "IdDistribuidor", referencedColumnName = "Id", nullable = false)
     @OneToOne(optional = false)
     private Distribuidor idDistribuidor;
-    @OneToMany(mappedBy = "idVale")
-    private List<Pagos> pagosList;
 
     public Vales() {
     }
@@ -259,14 +257,5 @@ public class Vales implements Serializable {
     public String toString() {
         return "com.bhermanos.cobranza.api.Vales[ id=" + id + " ]";
     }
-
-    public List<Pagos> getPagosList() {
-        return pagosList;
-    }
-
-    public void setPagosList(List<Pagos> pagosList) {
-        this.pagosList = pagosList;
-    }
-
     
 }
