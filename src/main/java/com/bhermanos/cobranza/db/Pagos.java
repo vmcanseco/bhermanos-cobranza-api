@@ -7,6 +7,7 @@ package com.bhermanos.cobranza.db;
 
 import com.bhermanos.cobranza.db.Vales;
 import com.bhermanos.cobranza.db.Ventas;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -45,7 +46,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "Pagos.findByPagado", query = "SELECT p FROM Pagos p WHERE p.pagado = :pagado")
     , @NamedQuery(name = "Pagos.findByFechaProgramada", query = "SELECT p FROM Pagos p WHERE p.fechaProgramada = :fechaProgramada")
     , @NamedQuery(name = "Pagos.findByFechaCreacion", query = "SELECT p FROM Pagos p WHERE p.fechaCreacion = :fechaCreacion")
-    , @NamedQuery(name = "Pagos.findByFechaActualizacion", query = "SELECT p FROM Pagos p WHERE p.fechaActualizacion = :fechaActualizacion")})
+    , @NamedQuery(name = "Pagos.findByFechaActualizacion", query = "SELECT p FROM Pagos p WHERE p.fechaActualizacion = :fechaActualizacion")
+    , @NamedQuery(name = "Pagos.findByLatePayments", query = "SELECT p FROM Pagos p WHERE p.fechaProgramada <= :fechaProgramada AND p.pagado='N'")})
 public class Pagos implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -99,9 +101,10 @@ public class Pagos implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaActualizacion;
     @OneToMany(mappedBy = "idPago")
-    private List<HistorialPagos> historialPagosList;
+    private List<HistorialPagos> historialPagosList;    
     @JoinColumn(name = "IdVenta", referencedColumnName = "Id")
     @ManyToOne
+    @JsonFilter("voucherFilter")
     private Ventas idVenta;
 
     public Pagos() {

@@ -83,7 +83,7 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
 
             LocalDate currentDate = LocalDate.of(currentYear, entity.getMesInicioPago(), 1);
             if (entity.getDiaPago() == 1) {
-                currentDate = currentDate.plusDays(15);
+                currentDate = currentDate.plusDays(14);
             } else {
                 currentDate = currentDate.plusMonths(1).minusDays(1);
             }
