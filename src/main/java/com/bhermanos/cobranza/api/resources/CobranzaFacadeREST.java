@@ -50,24 +50,26 @@ public class CobranzaFacadeREST {
 
         LocalDate programmedLocaDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         Date progammedDate = java.sql.Date.valueOf(programmedLocaDate);
-        List<Pagos> result = new ArrayList<>();
-        List<Pagos> filteredResult = new ArrayList<>();
+
+        //List<Pagos> filteredResult = new ArrayList<>();
         try {
             entityManager = getEntityManager();
             String query = "Pagos.findByFechaProgramada";
             if (includeLatePayments) {
                 query = "Pagos.findByLatePayments";
             }
-            result = entityManager.createNamedQuery(query, Pagos.class).setParameter("fechaProgramada", progammedDate).getResultList();
-
+            final List<Pagos> result = entityManager.createNamedQuery(query, Pagos.class).setParameter("fechaProgramada", progammedDate).getResultList();
+            final  List<Pagos> filteredResult = new ArrayList<>();
             if (clientId != null && clientId > 0 && result.size() > 0) {
-                filteredResult = result.stream().filter(pago -> {
+                 filteredResult.addAll(result.stream().filter(pago -> {
                     return pago.getIdVenta().getIdVale().getIdCliente().getId().equals(clientId);
                 }).sorted(Comparator.comparingInt((value) -> {
                     return value.getNumPago();
-                })).collect(Collectors.toList());
+                })).collect(Collectors.toList()));
             } else {
-                filteredResult = result;
+                 filteredResult.addAll(result.stream().sorted(Comparator.comparingInt((value) -> {
+                    return value.getNumPago();
+                })).collect(Collectors.toList()));
             }
             entityManager.close();
 
@@ -76,12 +78,30 @@ public class CobranzaFacadeREST {
                         return o1.getId().compareTo(o2.getId());
                     }).collect(Collectors.toList());
 
-            /*SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+            clientes.stream().forEach(cliente -> {
+                cliente.setValesCollection(null);
+                cliente.setHistorialPagosList(null);
+            });
+
+            List<ClientePagos> clientePagosList = clientes.stream().map(cliente -> {
+                List<Pagos> pagos = filteredResult.stream().filter(pago -> {
+                    return pago.getIdVenta().getIdVale().getIdCliente().getId().equals(cliente.getId());
+                }).collect(Collectors.toList());
+                
+                /*cliente.setPagos(pagos);
+                return cliente;*/
+                ClientePagos clientePagos = new ClientePagos();
+                clientePagos.setCliente(cliente);
+                clientePagos.setPagos(pagos);
+                return clientePagos;
+            }).collect(Collectors.toList());
+
+            SimpleFilterProvider filterProvider = new SimpleFilterProvider();
             filterProvider.addFilter("voucherFilter",
-                    SimpleBeanPropertyFilter.serializeAllExcept("idVenta", "pagosList"));*/
+                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente","idVenta", "idVale","pagosList"));
             ObjectMapper mapper = new ObjectMapper();
-            //mapper.setFilterProvider(filterProvider);*/
-            String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(clientes);
+            mapper.setFilterProvider(filterProvider);
+            String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(clientePagosList);
             return Response.ok(jsonResult).build();
 
         } catch (Exception ex) {

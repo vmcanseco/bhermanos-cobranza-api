@@ -6,11 +6,16 @@
 package com.bhermanos.cobranza.api.resources;
 
 import com.bhermanos.cobranza.db.Clientes;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.ws.rs.Consumes;
@@ -114,19 +119,19 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
             entityManager = getEntityManager();
             result = entityManager.find(Clientes.class, id);
             entityManager.close();
-            if (result!=null){
+            if (result != null) {
                 return Response.ok(result).build();
-            }else{
+            } else {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
-            
+
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Error al buscar cliente por Id. Consulte administrador del sitio.")
                     .type(MediaType.TEXT_PLAIN).build());
         }
-        
+
     }
 
     @GET
@@ -142,6 +147,39 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
             ex.printStackTrace();
         }
         return result;
+    }
+
+    @GET
+    @Path("pagos-pendientes")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response findByPendigPayments() {
+        List<Clientes> result = new ArrayList<>();
+        List<KeyValue> sortedResult = new ArrayList<>();
+        try {
+            entityManager = getEntityManager();
+            result = entityManager.createNamedQuery("Clientes.findByPendingPayments", Clientes.class).getResultList();
+             sortedResult= result.stream().sorted((c1, c2) -> {
+                return c1.getNombre().compareTo(c2.getNombre());
+            }).map(cliente ->{
+               return new KeyValue(cliente.getId(), String.format("%s %s %s", cliente.getNombre(),cliente.getApellidoPaterno(),cliente.getApellidoMaterno()));
+            }).collect(Collectors.toList());
+            entityManager.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        //mapper.setFilterProvider(filterProvider);*/
+        String jsonResult;
+        try {
+            jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(sortedResult);
+            return Response.ok(jsonResult).build();
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(ClientesFacadeREST.class.getName()).log(Level.SEVERE, null, ex);
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al buscar clientes con pagos pendientes. Consulte administrador del sitio.")
+                    .type(MediaType.TEXT_PLAIN).build());
+        }
+
     }
 
     @GET

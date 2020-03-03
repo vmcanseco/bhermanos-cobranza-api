@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author canseco.victor
  */
 @Entity
-@Table(name = "pagos",catalog = "bhermanos", schema = "")
+@Table(name = "pagos", catalog = "bhermanos", schema = "")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Pagos.findAll", query = "SELECT p FROM Pagos p")
@@ -47,7 +47,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "Pagos.findByFechaProgramada", query = "SELECT p FROM Pagos p WHERE p.fechaProgramada = :fechaProgramada")
     , @NamedQuery(name = "Pagos.findByFechaCreacion", query = "SELECT p FROM Pagos p WHERE p.fechaCreacion = :fechaCreacion")
     , @NamedQuery(name = "Pagos.findByFechaActualizacion", query = "SELECT p FROM Pagos p WHERE p.fechaActualizacion = :fechaActualizacion")
-    , @NamedQuery(name = "Pagos.findByLatePayments", query = "SELECT p FROM Pagos p WHERE p.fechaProgramada <= :fechaProgramada AND p.pagado='N'")})
+    , @NamedQuery(name = "Pagos.findByLatePayments", query = "SELECT p FROM Pagos p WHERE p.fechaProgramada <= :fechaProgramada AND p.pagado='N'")
+    , @NamedQuery(name = "Pagos.findByPaymentsByClientId", query = "SELECT p FROM Pagos p WHERE p.idVenta.idVale.idCliente.id=:idCliente")})
 public class Pagos implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -101,7 +102,7 @@ public class Pagos implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaActualizacion;
     @OneToMany(mappedBy = "idPago")
-    private List<HistorialPagos> historialPagosList;    
+    private List<HistorialPagos> historialPagosList;
     @JoinColumn(name = "IdVenta", referencedColumnName = "Id")
     @ManyToOne
     @JsonFilter("voucherFilter")
@@ -217,8 +218,8 @@ public class Pagos implements Serializable {
     public void setInteresesPagados(BigDecimal interesesPagados) {
         this.interesesPagados = interesesPagados;
     }
-    
-        public List<HistorialPagos> getHistorialPagosList() {
+
+    public List<HistorialPagos> getHistorialPagosList() {
         return historialPagosList;
     }
 

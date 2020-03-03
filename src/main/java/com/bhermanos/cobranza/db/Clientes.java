@@ -23,17 +23,19 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
  * @author canseco.victor
  */
 @Entity
-@Table(name = "clientes",catalog = "", schema = "", uniqueConstraints = {
+@Table(name = "clientes", catalog = "", schema = "", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"Numero"})
     , @UniqueConstraint(columnNames = {"Id"})
     , @UniqueConstraint(columnNames = {"ine"})})
@@ -65,7 +67,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "Clientes.findByActivo", query = "SELECT c FROM Clientes c WHERE c.activo = :activo")
     , @NamedQuery(name = "Clientes.findByFechaCreacion", query = "SELECT c FROM Clientes c WHERE c.fechaCreacion = :fechaCreacion")
     , @NamedQuery(name = "Clientes.findByFechaModificacion", query = "SELECT c FROM Clientes c WHERE c.fechaModificacion = :fechaModificacion")
-    , @NamedQuery(name = "Clientes.validateExistingClient", query = "SELECT count(c) FROM Clientes c WHERE c.ine = :ine OR c.numero=:numero")})
+    , @NamedQuery(name = "Clientes.validateExistingClient", query = "SELECT count(c) FROM Clientes c WHERE c.ine = :ine OR c.numero=:numero")
+    ,@NamedQuery(name = "Clientes.findByPendingPayments", query = "SELECT distinct p.idVenta.idVale.idCliente FROM Pagos p WHERE p.pagado='N'")})
 public class Clientes implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -182,6 +185,9 @@ public class Clientes implements Serializable {
     private List<Vales> valesCollection;
     @OneToMany(mappedBy = "idCliente")
     private List<HistorialPagos> historialPagosList;
+
+    /*@Transient
+    private transient List<Pagos> pagos;*/
 
     public Clientes() {
     }
@@ -462,5 +468,11 @@ public class Clientes implements Serializable {
     public String toString() {
         return "com.bhermanos.cobranza.api.Clientes[ id=" + id + " ]";
     }
+    /*public List<Pagos> getPagos() {
+        return pagos;
+    }
 
+    public void setPagos(List<Pagos> pagos) {
+        this.pagos = pagos;
+    }*/
 }
