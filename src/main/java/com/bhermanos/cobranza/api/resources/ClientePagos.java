@@ -28,6 +28,10 @@ public class ClientePagos {
     @XmlElement(name = "pagos")
     private List<Pagos> pagos;
     
+    private BigDecimal totalVentas;
+    private BigDecimal totalPagado;
+    private BigDecimal totalDisponible;
+    
     public ClientePagos() {
     }
     
@@ -86,5 +90,38 @@ public class ClientePagos {
     public void setPagos(List<Pagos> pagos) {
         this.pagos = pagos;
     }
+
+    
+    @XmlTransient
+    @XmlElement(name = "total-ventas")
+    public BigDecimal getTotalVentas() {
+        return totalVentas;
+    }
+
+    public void setTotalVentas(BigDecimal totalVentas) {
+        this.totalVentas = totalVentas;
+    }
+
+    @XmlTransient
+    @XmlElement(name = "total-pagado")
+    public BigDecimal getTotalPagado() {
+        return totalPagado;
+    }
+
+    public void setTotalPagado(BigDecimal totalPagado) {
+        this.totalPagado = totalPagado;
+    }
+
+    @XmlTransient
+    @XmlElement(name = "total-pendiente-pago")
+    public BigDecimal getTotalDisponible() {
+        return totalDisponible;
+    }
+
+    public void setTotalDisponible(BigDecimal totalDisponible) {
+        this.totalDisponible = totalDisponible;
+    }
+    
+    
     
 }

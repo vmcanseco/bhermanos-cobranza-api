@@ -8,6 +8,7 @@ package com.bhermanos.cobranza.db;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
@@ -27,6 +28,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -184,11 +186,11 @@ public class Clientes implements Serializable {
     @JsonIgnoreProperties("idCliente")
     private List<Vales> valesCollection;
     @OneToMany(mappedBy = "idCliente")
+    @JsonIgnoreProperties("idCliente")
     private List<HistorialPagos> historialPagosList;
 
     /*@Transient
     private transient List<Pagos> pagos;*/
-
     public Clientes() {
     }
 
@@ -468,6 +470,7 @@ public class Clientes implements Serializable {
     public String toString() {
         return "com.bhermanos.cobranza.api.Clientes[ id=" + id + " ]";
     }
+
     /*public List<Pagos> getPagos() {
         return pagos;
     }
@@ -475,4 +478,15 @@ public class Clientes implements Serializable {
     public void setPagos(List<Pagos> pagos) {
         this.pagos = pagos;
     }*/
+
+    @XmlTransient
+    @XmlElement(name = "debito-disponible")
+    public BigDecimal getDebitoDisponible() {
+        if (this.historialPagosList != null) {
+            return this.historialPagosList.stream().filter(h->h.getIdPago()==null).map(h -> h.getMontoPagado()).reduce(BigDecimal.ZERO, (t, u) -> {
+                return t.add(u);
+            });
+        }
+        return BigDecimal.ZERO;
+    }
 }

@@ -7,6 +7,7 @@ package com.bhermanos.cobranza.db;
 
 import com.bhermanos.cobranza.db.Clientes;
 import com.bhermanos.cobranza.db.Pagos;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -23,6 +24,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -43,7 +45,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "HistorialPagos.findByFechaPago", query = "SELECT h FROM HistorialPagos h WHERE h.fechaPago = :fechaPago")
     , @NamedQuery(name = "HistorialPagos.findByComentarios", query = "SELECT h FROM HistorialPagos h WHERE h.comentarios = :comentarios")
     , @NamedQuery(name = "HistorialPagos.findByFechaCreacion", query = "SELECT h FROM HistorialPagos h WHERE h.fechaCreacion = :fechaCreacion")
-    , @NamedQuery(name = "HistorialPagos.findByFechaActualizacion", query = "SELECT h FROM HistorialPagos h WHERE h.fechaActualizacion = :fechaActualizacion")})
+    , @NamedQuery(name = "HistorialPagos.findByFechaActualizacion", query = "SELECT h FROM HistorialPagos h WHERE h.fechaActualizacion = :fechaActualizacion")
+    , @NamedQuery(name = "HistorialPagos.findAvailableDebitByClientId", query = "SELECT h FROM HistorialPagos h WHERE h.idCliente.id = :idCliente AND h.idPago IS NULL")})
 public class HistorialPagos implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -69,6 +72,7 @@ public class HistorialPagos implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaPago;
     @Size(max = 1000)
@@ -76,18 +80,22 @@ public class HistorialPagos implements Serializable {
     private String comentarios;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 45)
-    @Column(nullable = false, length = 45)
-    private String fechaCreacion;
-    @Size(max = 45)
-    @Column(length = 45)
-    private String fechaActualizacion;
+    @Column(name = "FechaCreacion", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fechaCreacion;
+    @Column(name = "FechaActualizacion")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fechaActualizacion;
     @JoinColumn(name = "IdCliente", referencedColumnName = "Id")
     @ManyToOne
     private Clientes idCliente;
     @JoinColumn(name = "IdPago", referencedColumnName = "Id")
     @ManyToOne
     private Pagos idPago;
+    @Transient
+    private BigDecimal totalPagado;
 
     public HistorialPagos() {
     }
@@ -96,7 +104,7 @@ public class HistorialPagos implements Serializable {
         this.id = id;
     }
 
-    public HistorialPagos(Integer id, String formaPago, BigDecimal montoPagado, BigDecimal interesesPagados, Date fechaPago, String fechaCreacion) {
+    public HistorialPagos(Integer id, String formaPago, BigDecimal montoPagado, BigDecimal interesesPagados, Date fechaPago, Date fechaCreacion) {
         this.id = id;
         this.formaPago = formaPago;
         this.montoPagado = montoPagado;
@@ -153,19 +161,19 @@ public class HistorialPagos implements Serializable {
         this.comentarios = comentarios;
     }
 
-    public String getFechaCreacion() {
+    public Date getFechaCreacion() {
         return fechaCreacion;
     }
 
-    public void setFechaCreacion(String fechaCreacion) {
+    public void setFechaCreacion(Date fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
 
-    public String getFechaActualizacion() {
+    public Date getFechaActualizacion() {
         return fechaActualizacion;
     }
 
-    public void setFechaActualizacion(String fechaActualizacion) {
+    public void setFechaActualizacion(Date fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
     }
 
@@ -209,5 +217,13 @@ public class HistorialPagos implements Serializable {
     public String toString() {
         return "com.bhermanos.cobranza.db.temp.HistorialPagos[ id=" + id + " ]";
     }
-    
+
+    public BigDecimal getTotalPagado() {
+        return totalPagado;
+    }
+
+    public void setTotalPagado(BigDecimal totalPagado) {
+        this.totalPagado = totalPagado;
+    }
+
 }

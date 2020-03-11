@@ -47,6 +47,7 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
 
     @POST
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    
     public Response create(Clientes entity) {
         try {
             entityManager = getEntityManager();

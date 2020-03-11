@@ -59,7 +59,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "Ventas.findByFechaCreacion", query = "SELECT v FROM Ventas v WHERE v.fechaCreacion = :fechaCreacion")
     , @NamedQuery(name = "Ventas.findByFechaModificacion", query = "SELECT v FROM Ventas v WHERE v.fechaModificacion = :fechaModificacion")
     , @NamedQuery(name = "Ventas.findByClientId", query = "SELECT v FROM Ventas v WHERE v.idVale.idCliente.id = :idCliente")
-    , @NamedQuery(name = "Ventas.findUnpaidSales", query = "SELECT v FROM Ventas v WHERE v.pagada='N'")})
+    , @NamedQuery(name = "Ventas.findUnpaidSales", query = "SELECT v FROM Ventas v WHERE v.pagada='N'")
+    , @NamedQuery(name = "Ventas.findUnpaidSalesByCliendId", query = "SELECT v FROM Ventas v WHERE v.pagada='N' and v.idVale.idCliente.id = :idCliente")})
 
 public class Ventas implements Serializable {
 

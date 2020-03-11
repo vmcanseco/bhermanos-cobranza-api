@@ -9,6 +9,7 @@ import com.bhermanos.cobranza.db.Vales;
 import com.bhermanos.cobranza.db.Ventas;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -29,7 +30,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -102,6 +105,7 @@ public class Pagos implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaActualizacion;
     @OneToMany(mappedBy = "idPago")
+    @JsonFilter("voucherFilter")
     private List<HistorialPagos> historialPagosList;
     @JoinColumn(name = "IdVenta", referencedColumnName = "Id")
     @ManyToOne
@@ -250,6 +254,24 @@ public class Pagos implements Serializable {
     @Override
     public String toString() {
         return "com.bhermanos.cobranza.db.temp.Pagos[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    @XmlElement(name = "total-disponible")
+    public BigDecimal getTotalDisponible() {
+        return this.getMonto().subtract(this.getMontoPagado());
+    }
+
+    @XmlTransient
+    @XmlElement(name = "intereses-disponible")
+    public BigDecimal getInteresesDisponible() {
+        return this.getIntereses().subtract(this.getInteresesPagados());
+    }
+
+    @XmlTransient
+    @XmlElement(name = "total-pendiente-pago")
+    public BigDecimal getPagoTotal() {
+        return this.getTotalDisponible().add(this.getInteresesDisponible());
     }
 
 }
