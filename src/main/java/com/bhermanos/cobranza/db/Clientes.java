@@ -189,8 +189,8 @@ public class Clientes implements Serializable {
     @JsonIgnoreProperties("idCliente")
     private List<HistorialPagos> historialPagosList;
 
-    /*@Transient
-    private transient List<Pagos> pagos;*/
+    @Transient
+    private transient List<Pagos> pagos;
     public Clientes() {
     }
 
@@ -471,13 +471,13 @@ public class Clientes implements Serializable {
         return "com.bhermanos.cobranza.api.Clientes[ id=" + id + " ]";
     }
 
-    /*public List<Pagos> getPagos() {
+    public List<Pagos> getPagos() {
         return pagos;
     }
 
     public void setPagos(List<Pagos> pagos) {
         this.pagos = pagos;
-    }*/
+    }
 
     @XmlTransient
     @XmlElement(name = "debito-disponible")

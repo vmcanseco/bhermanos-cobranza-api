@@ -8,6 +8,8 @@ package com.bhermanos.cobranza.api.resources;
 import com.bhermanos.cobranza.db.Clientes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -47,7 +49,7 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
 
     @POST
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    
+
     public Response create(Clientes entity) {
         try {
             entityManager = getEntityManager();
@@ -121,7 +123,13 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
             result = entityManager.find(Clientes.class, id);
             entityManager.close();
             if (result != null) {
-                return Response.ok(result).build();
+                SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+                filterProvider.addFilter("voucherFilter",
+                        SimpleBeanPropertyFilter.serializeAllExcept("idCliente", "idVenta", "idVale", "idPago", "historialPagosList"));
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.setFilterProvider(filterProvider);
+                String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+                return Response.ok(jsonResult).build();
             } else {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
@@ -136,18 +144,26 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
     }
 
     @GET
-    @Override
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<Clientes> findAll() {
+    public Response findAllClients() {
         List<Clientes> result = new ArrayList<>();
         try {
             entityManager = getEntityManager();
             result = entityManager.createNamedQuery("Clientes.findAll", Clientes.class).getResultList();
             entityManager.close();
+            SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+            filterProvider.addFilter("voucherFilter",
+                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente", "idVenta", "idVale", "idPago", "historialPagosList"));
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setFilterProvider(filterProvider);
+            String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+            return Response.ok(jsonResult).build();
         } catch (Exception ex) {
             ex.printStackTrace();
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al buscar clientes. Consulte administrador del sitio.")
+                    .type(MediaType.TEXT_PLAIN).build());
         }
-        return result;
     }
 
     @GET
@@ -159,10 +175,10 @@ public class ClientesFacadeREST extends AbstractFacade<Clientes> {
         try {
             entityManager = getEntityManager();
             result = entityManager.createNamedQuery("Clientes.findByPendingPayments", Clientes.class).getResultList();
-             sortedResult= result.stream().sorted((c1, c2) -> {
+            sortedResult = result.stream().sorted((c1, c2) -> {
                 return c1.getNombre().compareTo(c2.getNombre());
-            }).map(cliente ->{
-               return new KeyValue(cliente.getId(), String.format("%s %s %s", cliente.getNombre(),cliente.getApellidoPaterno(),cliente.getApellidoMaterno()));
+            }).map(cliente -> {
+                return new KeyValue(cliente.getId(), String.format("%s %s %s", cliente.getNombre(), cliente.getApellidoPaterno(), cliente.getApellidoMaterno()));
             }).collect(Collectors.toList());
             entityManager.close();
         } catch (Exception ex) {

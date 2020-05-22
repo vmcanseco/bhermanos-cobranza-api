@@ -51,7 +51,8 @@ import javax.xml.bind.annotation.XmlTransient;
     , @NamedQuery(name = "Pagos.findByFechaCreacion", query = "SELECT p FROM Pagos p WHERE p.fechaCreacion = :fechaCreacion")
     , @NamedQuery(name = "Pagos.findByFechaActualizacion", query = "SELECT p FROM Pagos p WHERE p.fechaActualizacion = :fechaActualizacion")
     , @NamedQuery(name = "Pagos.findByLatePayments", query = "SELECT p FROM Pagos p WHERE p.fechaProgramada <= :fechaProgramada AND p.pagado='N'")
-    , @NamedQuery(name = "Pagos.findByPaymentsByClientId", query = "SELECT p FROM Pagos p WHERE p.idVenta.idVale.idCliente.id=:idCliente")})
+    , @NamedQuery(name = "Pagos.findByPaymentsByClientId", query = "SELECT p FROM Pagos p WHERE p.idVenta.idVale.idCliente.id=:idCliente")
+    , @NamedQuery(name = "Pagos.findByInterestPayments", query = "SELECT p FROM Pagos p WHERE p.fechaProgramada < :fechaProgramada AND p.pagado='N'")})
 public class Pagos implements Serializable {
 
     private static final long serialVersionUID = 1L;

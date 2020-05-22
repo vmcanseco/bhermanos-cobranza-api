@@ -253,7 +253,7 @@ public class CobranzaFacadeREST {
 
             SimpleFilterProvider filterProvider = new SimpleFilterProvider();
             filterProvider.addFilter("voucherFilter",
-                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente", "idVenta", "idVale", "pagosList","idPago"));
+                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente", "idVenta", "idVale", "pagosList", "idPago"));
             ObjectMapper mapper = new ObjectMapper();
             mapper.setFilterProvider(filterProvider);
             String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(clientePagosList);
@@ -267,6 +267,91 @@ public class CobranzaFacadeREST {
                     .type(MediaType.TEXT_PLAIN).build());
         }
 
+    }
+
+    @GET
+    @Path("clientes-pagos-demorados")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response searchClientsPendingPayments(@QueryParam("fecha") String date) {
+
+        LocalDate programmedLocaDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        Date progammedDate = java.sql.Date.valueOf(programmedLocaDate);
+
+        //List<Pagos> filteredResult = new ArrayList<>();
+        try {
+            entityManager = getEntityManager();
+            String query = "Pagos.findByInterestPayments";
+            final List<Pagos> result = entityManager.createNamedQuery(query, Pagos.class).setParameter("fechaProgramada", progammedDate).getResultList();
+            final List<Pagos> filteredResult = new ArrayList<>();
+
+            filteredResult.addAll(result.stream().sorted(Comparator.comparingInt((value) -> {
+                return value.getNumPago();
+            })).collect(Collectors.toList()));
+
+        
+
+            List<Clientes> clientes = filteredResult.stream().map(pago -> pago.getIdVenta().getIdVale().getIdCliente())
+                    .sorted((o1, o2) -> {
+                        return o1.getId().compareTo(o2.getId());
+                    }).distinct().collect(Collectors.toList());
+
+            clientes.stream().forEach(cliente -> {
+                cliente.setValesCollection(null);
+                cliente.setHistorialPagosList(null);
+            });
+
+            List<ClientePagos> clientePagosList = clientes.stream().map(cliente -> {
+                List<Pagos> pagos = filteredResult.stream().filter(pago -> {
+                    return pago.getIdVenta().getIdVale().getIdCliente().getId().equals(cliente.getId());
+                }).collect(Collectors.toList());
+                
+                pagos.stream().forEach(pago ->{
+                    pago.setHistorialPagosList(null);
+                });
+
+                /*cliente.setPagos(pagos);
+                return cliente;*/
+                List<Ventas> ventas = entityManager.createNamedQuery("Ventas.findUnpaidSalesByCliendId", Ventas.class).setParameter("idCliente", cliente.getId()).getResultList();
+                ClientePagos clientePagos = new ClientePagos();
+                clientePagos.setCliente(cliente);
+                clientePagos.setPagos(pagos);
+                clientePagos.setTotalVentas(ventas.stream().map(venta -> {
+                    return venta.getMonto();
+                }).reduce(BigDecimal.ZERO, (t, u) -> {
+                    return t.add(u);
+                }));
+                clientePagos.setTotalPagado(ventas.stream().map(venta -> {
+                    return venta.getMontoPagado();
+                }).reduce(BigDecimal.ZERO, (t, u) -> {
+                    return t.add(u);
+                }));
+                clientePagos.setTotalDisponible(ventas.stream().map(venta -> {
+                    return venta.getMontoDisponible();
+                }).reduce(BigDecimal.ZERO, (t, u) -> {
+                    return t.add(u);
+                }));
+                return clientePagos;
+            }).collect(Collectors.toList());
+
+            SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+            filterProvider.addFilter("voucherFilter",
+                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente", "idVenta", "idVale", "pagosList", "idPago","historialPagosList"));
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setFilterProvider(filterProvider);
+            String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(clientePagosList);
+            return Response.ok(jsonResult).build();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al obtener lista de ventas. Consulte administrador del sitio.")
+                    .type(MediaType.TEXT_PLAIN).build());
+        }finally{
+            entityManager.close();
+        }
+
+        
     }
 
 }
