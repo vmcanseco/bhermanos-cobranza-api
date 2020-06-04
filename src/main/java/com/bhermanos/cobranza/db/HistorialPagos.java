@@ -8,6 +8,7 @@ package com.bhermanos.cobranza.db;
 import com.bhermanos.cobranza.db.Clientes;
 import com.bhermanos.cobranza.db.Pagos;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -93,6 +94,7 @@ public class HistorialPagos implements Serializable {
     private Clientes idCliente;
     @JoinColumn(name = "IdPago", referencedColumnName = "Id")
     @ManyToOne
+    @JsonIgnoreProperties("historialPagosList")
     private Pagos idPago;
     @Transient
     private BigDecimal totalPagado;

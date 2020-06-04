@@ -8,22 +8,29 @@ package com.bhermanos.cobranza.api.resources;
 import com.bhermanos.cobranza.api.providers.LocalEntityManagerFactory;
 import com.bhermanos.cobranza.db.Clientes;
 import com.bhermanos.cobranza.db.HistorialPagos;
+import com.bhermanos.cobranza.db.InteresPagos;
 import com.bhermanos.cobranza.db.Pagos;
 import com.bhermanos.cobranza.db.Vales;
 import com.bhermanos.cobranza.db.Ventas;
+import com.bhermanos.cobranza.db.Ventas_;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -288,8 +295,6 @@ public class CobranzaFacadeREST {
                 return value.getNumPago();
             })).collect(Collectors.toList()));
 
-        
-
             List<Clientes> clientes = filteredResult.stream().map(pago -> pago.getIdVenta().getIdVale().getIdCliente())
                     .sorted((o1, o2) -> {
                         return o1.getId().compareTo(o2.getId());
@@ -304,8 +309,8 @@ public class CobranzaFacadeREST {
                 List<Pagos> pagos = filteredResult.stream().filter(pago -> {
                     return pago.getIdVenta().getIdVale().getIdCliente().getId().equals(cliente.getId());
                 }).collect(Collectors.toList());
-                
-                pagos.stream().forEach(pago ->{
+
+                pagos.stream().forEach(pago -> {
                     pago.setHistorialPagosList(null);
                 });
 
@@ -335,7 +340,7 @@ public class CobranzaFacadeREST {
 
             SimpleFilterProvider filterProvider = new SimpleFilterProvider();
             filterProvider.addFilter("voucherFilter",
-                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente", "idVenta", "idVale", "pagosList", "idPago","historialPagosList"));
+                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente", "idVenta", "idVale", "pagosList", "idPago", "historialPagosList"));
             ObjectMapper mapper = new ObjectMapper();
             mapper.setFilterProvider(filterProvider);
             String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(clientePagosList);
@@ -347,11 +352,105 @@ public class CobranzaFacadeREST {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Error al obtener lista de ventas. Consulte administrador del sitio.")
                     .type(MediaType.TEXT_PLAIN).build());
-        }finally{
+        } finally {
             entityManager.close();
         }
 
+    }
+
+    @POST
+    @Path("calculo-interes")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response calculateInterest(@FormParam("fecha")String date, @FormParam("aplicar")boolean apply) {
+        List<InteresPagos> interestPaymentList = new ArrayList<>();
         
+        LocalDate targetDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        Date progammedDate = java.sql.Date.valueOf(targetDate);
+
+        entityManager = getEntityManager();
+        try {
+        String query = "Pagos.findByInterestPayments";
+        final List<Pagos> result = entityManager.createNamedQuery(query, Pagos.class).setParameter("fechaProgramada", progammedDate).getResultList();
+        
+        result.stream().forEach(payment -> {
+            InteresPagos interestPayment= new InteresPagos();
+            Ventas sale = payment.getIdVenta();
+            Vales voucher = sale.getIdVale();
+            Clientes client = voucher.getIdCliente();
+            
+            LocalDate paymentDate=payment.getFechaProgramada().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+            long daysToApplyInt = sale.getDiasInteres();
+            long daysBetween = ChronoUnit.DAYS.between(paymentDate, targetDate);
+            BigDecimal interestRate = BigDecimal.valueOf(sale.getTasaInteres());
+            BigDecimal pendingAmount = payment.getMonto().subtract(payment.getMontoPagado());
+            BigDecimal interestAmount = BigDecimal.ZERO;
+            BigDecimal baseInterestAmount = BigDecimal.ZERO;
+            BigDecimal interestRateDec=interestRate.divide(BigDecimal.valueOf(100));
+
+            if (daysBetween < daysToApplyInt) {
+                daysToApplyInt = daysBetween;
+            }
+
+            for (int numDay = 0; numDay < daysToApplyInt; numDay++) {
+
+                switch (numDay) {
+                    case 0:
+                        baseInterestAmount = pendingAmount.multiply(interestRateDec);
+                        interestAmount=interestAmount.add(baseInterestAmount);
+
+                        break;
+                    default:
+                        interestAmount=interestAmount.add(baseInterestAmount.multiply(interestRateDec));
+                        break;
+                }
+            }
+            interestAmount=interestAmount.setScale(0, RoundingMode.HALF_EVEN);
+            baseInterestAmount=baseInterestAmount.setScale(0, RoundingMode.HALF_EVEN);
+            if (apply) {
+                entityManager.getTransaction().begin();
+                payment.setIntereses(interestAmount);
+                entityManager.persist(payment);
+                entityManager.getTransaction().commit();
+            }
+            
+            interestPayment.setIdCliente(client.getId());
+            interestPayment.setNombreCliente(client.getNombre());
+            interestPayment.setApellidoPaternoCliente(client.getApellidoPaterno());
+            interestPayment.setApellidoMaternoCliente(client.getApellidoMaterno());
+            interestPayment.setCodigoCliente(client.getNumero());
+            interestPayment.setIdVale(voucher.getId());
+            interestPayment.setTipoVale(voucher.getTipo());
+            interestPayment.setFolioVale(voucher.getFolio());
+            interestPayment.setIdVenta(sale.getId());
+            interestPayment.setDiasInteresVenta(sale.getDiasInteres());
+            interestPayment.setMontoVenta(sale.getMonto());
+            interestPayment.setTasaInteresVenta(sale.getTasaInteres());
+            interestPayment.setPagoMinimoVenta(sale.getPagoMinimo());
+            interestPayment.setPagoFinalVenta(sale.getPagoFinal());
+            interestPayment.setIdPago(payment.getId());
+            interestPayment.setNumPago(payment.getNumPago());
+            interestPayment.setMontoPago(payment.getMonto());
+            interestPayment.setInteresesPago(interestAmount);
+            interestPayment.setInteresesPagadosPago(payment.getInteresesPagados());
+            interestPayment.setInteresBasePago(baseInterestAmount);
+            interestPayment.setInteresAcumulados(interestAmount.subtract(baseInterestAmount));   
+            interestPayment.setDiasAtrasoPago((int)daysBetween);
+            interestPayment.setMontoPendientePago(pendingAmount);
+            interestPayment.setFechaProgramadoPago(payment.getFechaProgramada());
+            interestPaymentList.add(interestPayment);
+        });
+        return Response.ok(interestPaymentList).build();
+        }catch (Exception ex) {
+            ex.printStackTrace();
+
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al calcular intereses. Consulte administrador del sitio.")
+                    .type(MediaType.TEXT_PLAIN).build());
+        } finally {
+            entityManager.close();
+        }
     }
 
 }

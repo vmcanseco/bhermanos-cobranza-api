@@ -6,6 +6,8 @@
 package com.bhermanos.cobranza.api.resources;
 
 import com.bhermanos.cobranza.db.Clientes;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -18,13 +20,21 @@ import javax.persistence.Persistence;
 public class Main {
     
     public static void main(String[] args) {
-        EntityManagerFactory entityManagerFactory= Persistence.createEntityManagerFactory("bhermanos-cobranza");
+        /*EntityManagerFactory entityManagerFactory= Persistence.createEntityManagerFactory("bhermanos-cobranza");
         EntityManager entityManager=entityManagerFactory.createEntityManager();
-        /*javax.persistence.criteria.CriteriaQuery cq = entityManager.getCriteriaBuilder().createQuery();
-        cq.select(cq.from(Clientes.class));*/
+
         List<Clientes> listClientes=entityManager.createNamedQuery("Clientes.findAll", Clientes.class).getResultList();
         entityManager.close();
-        entityManagerFactory.close();
+        entityManagerFactory.close();*/
+        testLocalDate();
         
+    }
+    
+    private static void testLocalDate() {
+        LocalDate localDate=LocalDate.now();
+        LocalDate localDate2= LocalDate.of(2020,6,30);
+        System.out.println(localDate.toEpochDay());
+        System.out.println(localDate2.toEpochDay());
+        System.out.println(ChronoUnit.DAYS.between(localDate, localDate2));
     }
 }

@@ -6,6 +6,9 @@
 package com.bhermanos.cobranza.api.resources;
 
 import com.bhermanos.cobranza.db.Vales;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +54,6 @@ public class ValesFacadeREST extends AbstractFacade<Vales> {
             return Response.ok(entity).build();
 
         } catch (Exception ex) {
-            entityManager.close();
             ex.printStackTrace();
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Error al crear cliente. Consulte administrador del sitio.")
@@ -62,15 +64,25 @@ public class ValesFacadeREST extends AbstractFacade<Vales> {
     @GET
     @Path("disponibles")
     @Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-    public List<Vales> findAvailableVouchersByClient(@QueryParam("idCliente") Integer clientId){
+    public Response findAvailableVouchersByClient(@QueryParam("idCliente") Integer clientId){
          List<Vales> result = new ArrayList<>();
         try {
             entityManager = getEntityManager();
             result = entityManager.createNamedQuery("Vales.findAvailablesByClient", Vales.class).setParameter("idCliente", clientId).getResultList();
             entityManager.close();
+            SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+            filterProvider.addFilter("voucherFilter",
+                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente","idVenta", "idVale","pagosList","historialPagosList"));
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setFilterProvider(filterProvider);
+            String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+            return Response.ok(jsonResult).build();
         } catch (Exception ex) {
             ex.printStackTrace();
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al obtener vales disponibles. Consulte administrador del sitio.")
+                    .type(MediaType.TEXT_PLAIN).build());
         }
-        return result;
+        
     }
 }

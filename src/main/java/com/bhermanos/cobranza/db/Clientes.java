@@ -5,6 +5,7 @@
  */
 package com.bhermanos.cobranza.db;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
@@ -187,6 +188,7 @@ public class Clientes implements Serializable {
     private List<Vales> valesCollection;
     @OneToMany(mappedBy = "idCliente")
     @JsonIgnoreProperties("idCliente")
+    @JsonFilter("voucherFilter")
     private List<HistorialPagos> historialPagosList;
 
     @Transient

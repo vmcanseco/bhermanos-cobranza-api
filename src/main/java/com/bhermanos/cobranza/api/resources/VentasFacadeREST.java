@@ -132,7 +132,7 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
             entityManager.close();
             SimpleFilterProvider filterProvider = new SimpleFilterProvider();
             filterProvider.addFilter("voucherFilter",
-                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente","idVenta", "idVale","pagosList"));
+                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente","idVenta", "idVale","pagosList","historialPagosList"));
             ObjectMapper mapper = new ObjectMapper();
             mapper.setFilterProvider(filterProvider);
             String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entity);
@@ -160,7 +160,7 @@ public class VentasFacadeREST extends AbstractFacade<Ventas> {
             entityManager.close();
             SimpleFilterProvider filterProvider = new SimpleFilterProvider();
             filterProvider.addFilter("voucherFilter",
-                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente","idVenta", "idVale","pagosList"));
+                    SimpleBeanPropertyFilter.serializeAllExcept("idCliente","idVenta", "idVale","pagosList","historialPagosList"));
             ObjectMapper mapper = new ObjectMapper();
             mapper.setFilterProvider(filterProvider);
             String jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
